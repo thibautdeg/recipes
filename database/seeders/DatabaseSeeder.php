@@ -23,27 +23,22 @@ class DatabaseSeeder extends Seeder
 
         User::factory(10)->create();
 
-        Category::factory(10)->create();
+        $categories = Category::factory(10)->create();
+        $ingredients = Ingredient::factory(500)->create();
 
-        Ingredient::factory(500)->create();
+        Recipe::factory(500)
+            ->recycle($categories)
+            ->create()
+            ->each(function ($recipe) use ($ingredients) {
+                $units = ['kg', 'liter', 'g', 'ml', 'tbsp', 'tsp'];
+                $selectedIngredients = $ingredients->random(rand(3, 10));
 
-        Recipe::factory(500)->create()->each(function ($recipe) {
-            $units       = [
-                'kg',
-                'liter',
-                'g',
-                'ml',
-                'tbsp',
-                'tsp',
-            ];
-            $ingredients = Ingredient::inRandomOrder()->take(rand(3, 10))->pluck('id');
-
-            foreach ($ingredients as $ingredient) {
-                $recipe->ingredients()->attach($ingredient, [
-                    'quantity' => rand(1, 100) / 10,
-                    'unit' => $units[array_rand($units)],
-                ]);
-            }
-        });
+                foreach ($selectedIngredients as $ingredient) {
+                    $recipe->ingredients()->attach($ingredient, [
+                        'quantity' => rand(1, 100) / 10,
+                        'unit' => $units[array_rand($units)],
+                    ]);
+                }
+            });
     }
 }
