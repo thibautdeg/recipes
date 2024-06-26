@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Filters\V1\QueryFilter;
 use App\Models\Scopes\NotHiddenForUserScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,5 +34,10 @@ class Recipe extends Model
     public function hiddenByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'hidden_recipes');
+    }
+
+    public function scopeFilter(Builder $builder, QueryFilter $filters): Builder
+    {
+        return $filters->apply($builder);
     }
 }
