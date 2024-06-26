@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Http\Controllers\Filters\V1\RecipeFilter;
 use App\Models\Category;
 use App\Models\Recipe;
 
+use Illuminate\Http\Request;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -49,13 +51,11 @@ class RecipeList extends Component
     {
         $this->validate();
 
-        $recipes = Recipe::query()
-            ->when(!empty($this->search), function ($query) {
-                $query->where('title', 'like', '%' . $this->search . '%');
-            })
-            ->when(!empty($this->selectedCategories), function ($query) {
-                $query->whereIn('category_id', $this->selectedCategories);
-            })
+        $request = new Request($this->getFilterParameters());
+
+        $filter = new RecipeFilter($request);
+
+        $recipes = Recipe::filter($filter)
             ->latest()
             ->paginate(30)
             ->withQueryString();
@@ -66,5 +66,20 @@ class RecipeList extends Component
             'recipes' => $recipes,
             'categories' => $categories,
         ]);
+    }
+
+    private function getFilterParameters(): array
+    {
+        $parameters = [];
+
+        if (!empty($this->search)) {
+            $parameters['filter']['title'] = "*$this->search*";
+        }
+
+        if (!empty($this->selectedCategories)) {
+            $parameters['filter']['categories'] = implode(',', $this->selectedCategories);
+        }
+
+        return $parameters;
     }
 }
