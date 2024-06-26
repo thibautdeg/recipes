@@ -12,6 +12,15 @@ class RecipeFilter extends QueryFilter
         return $this->builder->with($value);
     }
 
+    public function search($value)
+    {
+        $this->builder
+            ->where('title', 'like', "%$value%")
+            ->orWhereHas('ingredients', function ($query) use ($value) {
+                $query->where('name', 'like', "%$value%");
+            });
+    }
+
     public function title($value): Builder
     {
         $like_str = str_replace('*', '%', $value);

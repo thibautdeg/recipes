@@ -12,6 +12,6 @@ class RecipeController extends Controller
 {
     public function index(RecipeFilter $filters)
     {
-        return RecipeResource::collection(Recipe::filter($filters)->get());
+        return RecipeResource::collection(Recipe::filter($filters)->paginate(30));
     }
 }

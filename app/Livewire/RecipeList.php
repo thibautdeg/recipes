@@ -73,7 +73,7 @@ class RecipeList extends Component
         $parameters = [];
 
         if (!empty($this->search)) {
-            $parameters['filter']['title'] = "*$this->search*";
+            $parameters['filter']['search'] = $this->search;
         }
 
         if (!empty($this->selectedCategories)) {
