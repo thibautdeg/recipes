@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Recipe;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
@@ -23,22 +24,22 @@ class RecipeDetail extends Component
         }
     }
 
+    public function hideRecipe()
+    {
+        $this->recipe->hiddenByUsers()->attach(auth()->id());
+        $this->redirectRoute('recipes.index');
+    }
+
     public function render()
     {
 
-//        $similarRecipes = Cache::remember('similar-recipes-' . $this->recipe->id, 3600, function () {
-//            return Recipe::where('category_id', $this->recipe->category_id)
-//                ->where('id', '!=', $this->recipe->id)
-//                ->inRandomOrder()
-//                ->take(4)
-//                ->get();
-//        });
-
-        $similarRecipes = Recipe::where('category_id', $this->recipe->category_id)
-            ->where('id', '!=', $this->recipe->id)
-            ->inRandomOrder()
-            ->take(4)
-            ->get();
+        $similarRecipes = Cache::remember('similar-recipes-' . $this->recipe->id, Carbon::now()->addDay(), function () {
+            return Recipe::where('category_id', $this->recipe->category_id)
+                ->where('id', '!=', $this->recipe->id)
+                ->inRandomOrder()
+                ->take(4)
+                ->get();
+        });
 
         return view('livewire.recipe-detail', [
             'recipe' => $this->recipe,
